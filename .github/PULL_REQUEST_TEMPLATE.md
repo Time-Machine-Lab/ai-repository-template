@@ -1,18 +1,17 @@
 <!-- multica
-task_id: <required-task-id>
-run_id: <required-run-id>
-change_id: <optional-change-id>
+task_id: <必填任务标识>
+run_id: <必填运行标识>
+change_id: <可选变更标识>
 -->
 
-## Goal
+## 目标
 
-## Scope
+## 变更范围
 
-## Acceptance criteria
+## 验收标准
 
 - [ ]
 
-## Tests
+## 测试结果
 
-## Risk and rollback
-
+## 风险和回滚
