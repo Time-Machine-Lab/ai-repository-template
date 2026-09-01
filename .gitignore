@@ -8,3 +8,5 @@ build/
 coverage/
 node_modules/
 vendor/
+__pycache__/
+*.pyc
