@@ -1,0 +1,44 @@
+name: pr-policy
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  metadata:
+    name: pr-metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR metadata
+        env:
+          EVENT_PATH: ${{ github.event_path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$EVENT_PATH" <<'PY'
+          import json
+          import re
+          import sys
+
+          event = json.load(open(sys.argv[1], encoding="utf-8"))
+          body = event.get("pull_request", {}).get("body") or ""
+          block = re.search(r"<!--\s*multica(.*?)-->", body, re.S | re.I)
+          if not block:
+              raise SystemExit("PR must contain a multica metadata block")
+
+          fields = {}
+          for line in block.group(1).splitlines():
+              if ":" in line:
+                  key, value = line.split(":", 1)
+                  fields[key.strip()] = value.strip()
+
+          for required in ("task_id", "run_id"):
+              if not fields.get(required) or fields[required].startswith("<"):
+                  raise SystemExit(f"missing PR metadata: {required}")
+
+          print("PR metadata is valid")
+          PY
