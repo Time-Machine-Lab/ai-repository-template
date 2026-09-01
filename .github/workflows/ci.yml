@@ -17,6 +17,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Go
+        if: hashFiles('go.mod') != ''
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Setup Node
+        if: hashFiles('package.json') != '' && hashFiles('bun.lockb') == '' && hashFiles('bun.lock') == ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
       - name: Setup Bun
         if: hashFiles('bun.lockb') != '' || hashFiles('bun.lock') != ''
         uses: oven-sh/setup-bun@v2
