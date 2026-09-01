@@ -1,4 +1,4 @@
-name: pr-policy
+name: git-governance
 
 on:
   pull_request:
@@ -9,36 +9,20 @@ permissions:
   pull-requests: read
 
 jobs:
-  metadata:
-    name: pr-metadata
+  governance:
+    name: git-governance
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Validate PR metadata
-        env:
-          EVENT_PATH: ${{ github.event_path }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test policy validator
+        run: python -m unittest discover -s .github/scripts -p "test_*.py"
+
+      - name: Validate pull request
         shell: bash
         run: |
-          set -euo pipefail
-          python - "$EVENT_PATH" <<'PY'
-          import json
-          import re
-          import sys
-
-          event = json.load(open(sys.argv[1], encoding="utf-8"))
-          body = event.get("pull_request", {}).get("body") or ""
-          block = re.search(r"<!--\s*multica(.*?)-->", body, re.S | re.I)
-          if not block:
-              raise SystemExit("PR must contain a multica metadata block")
-
-          fields = {}
-          for line in block.group(1).splitlines():
-              if ":" in line:
-                  key, value = line.split(":", 1)
-                  fields[key.strip()] = value.strip()
-
-          for required in ("task_id", "run_id"):
-              if not fields.get(required) or fields[required].startswith("<"):
-                  raise SystemExit(f"missing PR metadata: {required}")
-
-          print("PR metadata is valid")
-          PY
+          python .github/scripts/validate_pr.py \
+            --event "$GITHUB_EVENT_PATH" \
+            --policy .git-management.json
