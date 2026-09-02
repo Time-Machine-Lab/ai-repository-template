@@ -14,6 +14,6 @@
 
 ## 使用边界
 
-开发 Agent 负责创建分支、提交代码和创建 PR。治理 Agent 只读取 PR 状态并发布 `git-governance` 检查结果。
+开发 Agent 负责创建分支、提交代码和创建 PR。仓库内 GitHub Actions 发布原生 `git-governance` 门禁；接入外部治理 Agent 后，由它只读观察 PR 并发布建议性的 `multica-governance` 检查。
 
 从本模板创建仓库后，使用 Git 治理工具包中的 `bootstrap-repository.ps1` 配置分支保护。
